@@ -1,17 +1,24 @@
 # Power Over Internet
 
-a poorly-named container that monitors net accessibility, and reboots your router when unresponsive
+a poorly-named container that monitors net availability, attempting to restart your connection via GPIO signaling when the network becomes unresponsive
 
-WARNING!: don't use this - it's designed to drop your internet connection via GPIO
+Inspired by:
 
-Pre-requisites:
  * https://fedoramagazine.org/turnon-led-fedora-iot/
+
+Requirements:
+
+ * an Internet connection that requires an occaisional reboot
+ * a Raspberry Pi or similar (ARM64 with GPIO)
  * http://iotrelay.com
+ * two wires
+
+WARNING!: this container attempts to drop your internet connection via GPIO
 
 Usage info:
 
 ```bash
-podman run -d -it --name rerouter --device=/dev/gpiochip0 ryanj:poweroverinternet
+sudo podman run -d -it --name rerouter --device=/dev/gpiochip0 ryanj/poweroverinternet:v1
 ```
 
 ### Development
