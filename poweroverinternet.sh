@@ -3,7 +3,7 @@ NET_LATCH="detached"
 REMOTE_SERVER="google.com"
 REMOTE_PORT=443
 GPIO_DOUT_PIN=21
-GPIO_CHIP=gpiochip0
+GPIO_DEV=gpiochip0
 METRICS_SUCCESS_HOST="example.com/user/repo/success/message"
 
 while true; do
@@ -40,7 +40,7 @@ else
     echo "network uplink is unavailable!"
     echo "restarting network uplink..."
 
-    /usr/bin/gpioset -s 4 --mode=time $GPIO_CHIP $GPIO_DOUT_PIN=1
+    /usr/bin/gpioset -s 4 --mode=time $GPIO_DEV $GPIO_DOUT_PIN=1
 
     # wait 60s for the network uplink to restart...
     echo "restart issued for net uplink"
