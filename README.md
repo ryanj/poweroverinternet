@@ -1,4 +1,4 @@
-# Power Over Internet
+# ⚡POWER🔃OVER📶INTERNET🔌
 
 a poorly-named container that monitors net availability, attempting to restart your connection via GPIO signaling when the network becomes unresponsive
 
