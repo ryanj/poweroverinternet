@@ -15,10 +15,18 @@ Requirements:
 
 WARNING!: this container attempts to drop your internet connection via GPIO
 
-Usage info:
+Basic usage info:
 
 ```bash
 sudo podman run -d -it --name rerouter --device=/dev/gpiochip0 ryanj/poweroverinternet:v1
+```
+
+### Configuration
+
+By default, this service will attempt to connect to `google.com` on port `443`.  Env keys can be used to configure the service with host and port settings, as shown here:
+
+```bash
+sudo podman run -d -it --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 -e DEBUG_OUT=enabled --device=/dev/gpiochip0 ryanj/poweroverinternet:v1
 ```
 
 ### Development
