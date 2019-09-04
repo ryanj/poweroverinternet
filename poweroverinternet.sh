@@ -9,34 +9,43 @@ GPIO_DOUT_PIN="${GPIO_DOUT_PIN:-21}"
 IDLE_SECONDS="${IDLE_SECONDS:-60}"
 RECOVERY_TIMEOUT_SECONDS="${RECOVERY_TIMEOUT_SECONDS:-600}"
 METRICS_SUCCESS_HOST="${METRICS_SUCCESS_HOST:-example.com/user/repo/success/message}"
+WELCOME_PROMPT="${WELCOME_PROMPT:-enabled}"
+SUPPRESS_EMOJIS="${SUPPRESS_EMOJIS:-false}"
+if [ "$SUPPRESS_EMOJIS" == "true" ]; then unset EMOJIS; else EMOJIS=enabled; fi
 
-echo "⚡POWER🔃OVER📶INTERNET🔌"
-echo "starting..."
-echo ""
+if [ "$WELCOME_PROMPT" == "enabled" ];
+then
+  echo "> echo ~/.plan"
+  echo "1. ${EMOJIS:+📶🤔 }Check ${REMOTE_SERVER}:${REMOTE_PORT} for availability..."
+  echo "2. ${EMOJIS:+⚡🔌 }Send net restart trigger events via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
+  echo ""
+  echo "> ./poweroverinternet.sh"
+  if [ "$SUPPRESS_EMOJIS" == "true" ]; then
+    echo "POWER OVER INTERNET"
+  else
+    echo "⚡POWER🔃OVER📶INTERNET🔌"
+  fi
+  echo ""
+  echo "status: "
+fi
 
-echo "> echo ~/.plan"
-echo "1. 📶🤔 Check ${REMOTE_SERVER}:${REMOTE_PORT} for availability..."
-echo "2. ⚡🔌 Send net restart trigger events via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
-echo ""
-
-echo "status: "
 NET_LATCH="detached"
 while true; do
 # reconnect the line when down
 if [ "$DEBUG_OUT" == "enabled" ];
 then
-  echo "📶📡 checking uplink..."
+  echo "${EMOJIS:+📶📡 }checking uplink..."
 fi
 if $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
 then
 
   if [ "$NET_LATCH" == "detached" ];
   then
-    echo "📶🖖 net uplink active"
+    echo "${EMOJIS:+📶🖖 }net uplink active"
   else
     if [ "$DEBUG_OUT" == "enabled" ];
     then
-      echo "📶🤙 net uplink active"
+      echo "${EMOJIS:+📶🤙 }net uplink active"
     fi
   fi
   NET_LATCH="attached"
@@ -45,44 +54,44 @@ then
   # sleep for $IDLE_SECONDS before checking the connection
   if [ "$DEBUG_OUT" == "enabled" ];
   then
-    echo "🤖💤 sleeping for ${IDLE_SECONDS}s..."
+    echo "${EMOJIS:+🤖💤 }sleeping for ${IDLE_SECONDS}s..."
   fi
   sleep $IDLE_SECONDS
 
 else
 
-  echo "⚠️ ↪️  lookup failed - trying again..."
+  echo "${EMOJIS:+⚠️ ↪️  }lookup failed - trying again..."
   # confirm the dropped connection with additional testing
   # TODO: loop here until $NET_TIMEOUT_TRIGGER (seconds) is exceeded?
   if $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
   then
-    echo "👻⏭️  disregarding failed lookup... "
+    echo "${EMOJIS:+👻⏭️  }disregarding failed lookup... "
 
   else
     NET_LATCH="detached"
-    echo "📶❌ network uplink is unavailable!"
-    echo "⚡🔃 restarting network uplink..."
+    echo "${EMOJIS:+📶❌ }network uplink is unavailable!"
+    echo "${EMOJIS:+⚡🔃 }restarting network uplink..."
     if ! $( /usr/bin/gpioset -s 4 --mode=time $GPIO_CHIP $GPIO_DOUT_PIN=1 );
     then
       echo "$@"
       exit 1
     fi
-    echo "🔌💫 net restart trigger issued via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
+    echo "${EMOJIS:+🔌💫 }net restart trigger issued via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
 
     # spinner...
-    echo "📶✨ waiting 60s for network uplink to restart..."
+    echo "${EMOJIS:+📶✨ }waiting 60s for network uplink to restart..."
     sleep 15
     echo ""
     sleep 10
-    echo "⏳⏳ waiting..."
+    echo "${EMOJIS:+⏳⏳ }waiting..."
     sleep 15
-    echo "⏳ waiting..."
+    echo "${EMOJIS:+⏳ }waiting..."
     sleep 10
-    echo "⌛ waiting..."
+    echo "${EMOJIS:+⌛ }waiting..."
     sleep 4
     echo ""
     sleep 1
-    echo "📶📡 testing uplink..."
+    echo "${EMOJIS:+📶📡 }testing uplink..."
 
     # monitor the connection for the next $RECOVERY_TIMEOUT_SECONDS
     QUITTING_TIME=$(($(date +%s) + $RECOVERY_TIMEOUT_SECONDS))
@@ -92,9 +101,9 @@ else
       # test network uplink
       if $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
       then
-        echo "📶✅ network uplink restored!"
+        echo "${EMOJIS:+📶✅ }network uplink restored!"
         DOWNTIME=$(( $(date +%s) - $NET_UP_TIME ))
-        echo "📶🌟 net connection recovered after ${DOWNTIME} seconds of downtime"
+        echo "${EMOJIS:+📶🌟 }net connection recovered after ${DOWNTIME} seconds of downtime"
         break
 
         # TODO: report success to external METRICS_SUCCESS_HOST
@@ -104,7 +113,7 @@ else
         # exit 0
 
       else
-        echo "🤔 testing uplink..."
+        echo "${EMOJIS:+🤔 }testing uplink..."
       fi
 
     done
