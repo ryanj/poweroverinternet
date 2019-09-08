@@ -70,6 +70,29 @@ By default, this service will attempt to contact `google.com` on port `443`.  En
 sudo podman run -d -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:v1
 ```
 
+### Installation
+
+This service can be installed and managed via Kubernetes or systemd.
+
+Example systemd unit: [poweroverinternet.service](https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service).
+
+To install this systemd unit on Fedora30 IoT, try:
+
+```bash
+sudo curl https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service -O /etc/systemd/system/poweroverinternet.service
+```
+
+Then load the systemd unit, and mark it active:
+```bash
+sudo systemctl reload-daemon
+sudo systemctl enable poweroverinternet
+```
+
+Check the status of the service with:
+```bash
+sudo systemctl status poweroverinternet
+```
+
 ### Development
 
 Tested and developed on Fedora 30 IoT

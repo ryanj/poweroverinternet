@@ -1,0 +1,17 @@
+[Unit]
+Description=Uplink connection watcher and power governor
+Documentation=https://github.com/ryanj/poweroverinternet
+Requires=network.target
+Wants=network-online.target
+After=network-online.target
+Before=shutdown.target multi-user.target
+Conflicts=shutdown.target
+
+[Install]
+WantedBy=multi-user.target local.target
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/podman kill rerouter;/usr/bin/podman rm rerouter
+ExecStart=/usr/bin/podman -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:latest
+ExecStop=/usr/bin/podman kill --force rerouter;/usr/bin/podman rm rerouter
