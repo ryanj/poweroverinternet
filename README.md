@@ -79,12 +79,12 @@ Example systemd unit: [poweroverinternet.service](https://raw.githubusercontent.
 To install this systemd unit on Fedora30 IoT, try:
 
 ```bash
-sudo curl https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service -O /etc/systemd/system/poweroverinternet.service
+sudo curl -o /etc/systemd/system/poweroverinternet.service https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service
 ```
 
 Then load the systemd unit, and mark it active:
 ```bash
-sudo systemctl reload-daemon
+sudo systemctl daemon-reload
 sudo systemctl enable poweroverinternet
 ```
 

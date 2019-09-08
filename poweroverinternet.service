@@ -12,6 +12,5 @@ WantedBy=multi-user.target local.target
 
 [Service]
 Restart=always
-ExecStartPre=/usr/bin/podman rm --force rerouter
-ExecStart=/usr/bin/podman -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:latest
+ExecStart=/usr/bin/podman run -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:latest
 ExecStop=/usr/bin/podman rm --force rerouter
