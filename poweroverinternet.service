@@ -1,5 +1,5 @@
 [Unit]
-Description=Uplink connection watcher and power governor
+Description=Net uplink watcher and power governor
 Documentation=https://github.com/ryanj/poweroverinternet
 Requires=network.target
 Wants=network-online.target
@@ -11,6 +11,13 @@ Conflicts=shutdown.target
 WantedBy=multi-user.target local.target
 
 [Service]
+Environment="REMOTE_SERVER=192.168.1.1"
+Environment="REMOTE_PORT=80"
+Environment="GPIO_DEVICE=gpiochip0"
+Environment="IMG=ryanj/poweroverinternet:latest"
+Environment="CONTAINER_NAME=rerouter"
 Restart=always
-ExecStart=/usr/bin/podman run -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:latest
-ExecStop=/usr/bin/podman rm --force rerouter
+ExecStartPre=-/usr/bin/podman rm --force ${CONTAINER_NAME}
+ExecStartPre=-/usr/bin/podman pull ${IMG}
+ExecStart=/usr/bin/podman run -it --rm --name ${CONTAINER_NAME} -e REMOTE_SERVER=${REMOTE_SERVER} -e REMOTE_PORT=${REMOTE_PORT} --device=/dev/${GPIO_DEVICE} ${IMG}
+ExecStop=/usr/bin/podman rm --force ${CONTAINER_NAME}

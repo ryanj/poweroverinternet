@@ -8,10 +8,10 @@ Inspired by:
 
 Requirements:
 
- * an Internet connection that requires an occaisional reboot
+ * an unreliable Internet connection
  * a Raspberry Pi or similar (ARM64 with GPIO)
- * http://iotrelay.com
- * two wires
+ * an AC/DC Control Relay, available from http://iotrelay.com
+ * two spare wires
 
 ## Disclaimers
 
@@ -70,13 +70,15 @@ By default, this service will attempt to contact `google.com` on port `443`.  En
 sudo podman run -d -it --rm --name rerouter -e REMOTE_SERVER=192.168.1.1 -e REMOTE_PORT=80 --device=/dev/gpiochip0 ryanj/poweroverinternet:v1
 ```
 
-These settings assume that you have a router or cable modem configured to respond on `192.168.1.1:80`.  In the event that the service is unable to make a connection to the configured host and port address, a trigger signal will be sent to the configured GPIO headers, which (when configured correctly) will activate the AC/DC control relay to restart any connected hardware devices.
+These settings assume that you have a router or cable modem configured to respond on `192.168.1.1:80`.
+
+In the event that the service is unable to make a connection to the configured host and port address, a trigger signal will be sent to the configured GPIO headers, which (when configured correctly) will activate the AC/DC control relay to restart any connected hardware devices.
 
 ### Installation
 
 This service can be installed and managed via Kubernetes or systemd.
 
-Example systemd unit: [poweroverinternet.service](https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service).
+Example systemd unit: [poweroverinternet.service](https://raw.githubusercontent.com/ryanj/poweroverinternet/master/poweroverinternet.service)
 
 To install this systemd unit on Fedora30 IoT, try:
 
@@ -90,7 +92,7 @@ sudo chmod 664 /etc/systemd/system/poweroverinternet.service
 cat /etc/systemd/system/poweroverinternet.service
 ```
 
-^ Update environment keys as needed. See [#configuration](#Configuration) for details.
+Update the environment keys as needed. See [#configuration](#Configuration) for details.
 
 When ready, load the systemd unit and mark it active:
 ```bash
