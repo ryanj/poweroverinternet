@@ -17,5 +17,6 @@ Environment="GPIO_DEVICE=gpiochip0"
 Environment="IMG=ryanj/poweroverinternet:latest"
 Environment="CONTAINER_NAME=rerouter"
 Restart=always
+ExecStartPre=-/usr/bin/podman rm --force ${CONTAINER_NAME}
 ExecStart=/usr/bin/podman run -it --rm --name ${CONTAINER_NAME} -e REMOTE_SERVER=${REMOTE_SERVER} -e REMOTE_PORT=${REMOTE_PORT} --device=/dev/${GPIO_DEVICE} ${IMG}
-ExecStop=/usr/bin/podman rm --force ${CONTAINER_NAME}
+ExecStop=-/usr/bin/podman rm --force ${CONTAINER_NAME}
