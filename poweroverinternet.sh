@@ -11,6 +11,7 @@ RECOVERY_TIMEOUT_SECONDS="${RECOVERY_TIMEOUT_SECONDS:-600}"
 METRICS_SUCCESS_HOST="${METRICS_SUCCESS_HOST:-example.com/user/repo/success/message}"
 WELCOME_PROMPT="${WELCOME_PROMPT:-enabled}"
 SUPPRESS_EMOJIS="${SUPPRESS_EMOJIS:-false}"
+DIE_HAPPY="${DIE_HAPPY:-false}"
 if [ "$SUPPRESS_EMOJIS" == "true" ]; then unset EMOJIS; else EMOJIS=enabled; fi
 
 if [ "$WELCOME_PROMPT" == "enabled" ];
@@ -80,17 +81,13 @@ else
 
     # spinner...
     echo "${EMOJIS:+📶✨ }waiting 60s for network uplink to restart..."
-    sleep 15
-    echo ""
-    sleep 10
+    sleep 23
     echo "${EMOJIS:+⏳⏳ }waiting..."
     sleep 15
     echo "${EMOJIS:+⏳ }waiting..."
     sleep 10
     echo "${EMOJIS:+⌛ }waiting..."
-    sleep 4
-    echo ""
-    sleep 1
+    sleep 5
     echo "${EMOJIS:+📶📡 }testing uplink..."
 
     # monitor the connection for the next $RECOVERY_TIMEOUT_SECONDS
@@ -98,7 +95,7 @@ else
     while [ "$(date +%s)" -le $QUITTING_TIME ]
     do
 
-      # test network uplink
+      # confirm reconnection of net uplink
       if $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
       then
         echo "${EMOJIS:+📶✅ }network uplink restored!"
@@ -108,10 +105,12 @@ else
 
         # TODO: report success to external METRICS_SUCCESS_HOST
 
-        # TODO: exit with success?
-        # this might allow kube to track of the number of recoveries
-        # exit 0
-
+        # exit with success?
+	if [ "$DIE_HAPPY" == "true" ];
+	then
+          exit 0
+	# else, daemonize
+        fi
       else
         echo "${EMOJIS:+🤔 }testing uplink..."
       fi
