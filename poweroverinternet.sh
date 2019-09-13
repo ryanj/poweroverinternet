@@ -8,26 +8,23 @@ GPIO_CHIP="${GPIO_CHIP:-gpiochip0}"
 GPIO_DOUT_PIN="${GPIO_DOUT_PIN:-21}"
 IDLE_SECONDS="${IDLE_SECONDS:-60}"
 RECOVERY_TIMEOUT_SECONDS="${RECOVERY_TIMEOUT_SECONDS:-600}"
-METRICS_SUCCESS_HOST="${METRICS_SUCCESS_HOST:-example.com/user/repo/success/message}"
-WELCOME_PROMPT="${WELCOME_PROMPT:-enabled}"
+METRICS_URL="${METRICS_URL:-http://example.com/user/repo/success/message}"
+EXTERNAL_METRICS="${EXTERNAL_METRICS:-false}"
+WELCOME_PROMPT="${WELCOME_PROMPT:-true}"
 SUPPRESS_EMOJIS="${SUPPRESS_EMOJIS:-false}"
 DIE_HAPPY="${DIE_HAPPY:-false}"
-if [ "$SUPPRESS_EMOJIS" == "true" ]; then unset EMOJIS; else EMOJIS=enabled; fi
+if [ "$SUPPRESS_EMOJIS" == "true" ]; then unset EMOJIS; else EMOJIS=true; fi
 
-if [ "$WELCOME_PROMPT" == "enabled" ];
+if [ "$WELCOME_PROMPT" == "true" ];
 then
-  echo "> echo ~/.plan"
+  echo "plan:"
   echo "1. ${EMOJIS:+📶🤔 }Check ${REMOTE_SERVER}:${REMOTE_PORT} for availability..."
   echo "2. ${EMOJIS:+⚡🔌 }Send net restart trigger events via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
-  echo ""
-  echo "> ./poweroverinternet.sh"
   if [ "$SUPPRESS_EMOJIS" == "true" ]; then
     echo "POWER OVER INTERNET"
   else
     echo "⚡POWER🔃OVER📶INTERNET🔌"
   fi
-  echo ""
-  echo "status: "
 fi
 
 NET_LATCH="detached"
@@ -75,7 +72,7 @@ else
     if ! $( /usr/bin/gpioset -s 4 --mode=time $GPIO_CHIP $GPIO_DOUT_PIN=1 );
     then
       echo "$@"
-      exit 1
+      #exit 1
     fi
     echo "${EMOJIS:+🔌💫 }net restart trigger issued via ${GPIO_CHIP} pin ${GPIO_DOUT_PIN}"
 
@@ -96,27 +93,34 @@ else
     do
 
       # confirm reconnection of net uplink
-      if $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
+      if ! $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
       then
-        echo "${EMOJIS:+📶✅ }network uplink restored!"
-        DOWNTIME=$(( $(date +%s) - $NET_UP_TIME ))
-        echo "${EMOJIS:+📶🌟 }net connection recovered after ${DOWNTIME} seconds of downtime"
-        break
-
-        # TODO: report success to external METRICS_SUCCESS_HOST
-
-        # exit with success?
-	if [ "$DIE_HAPPY" == "true" ];
-	then
-          exit 0
-	# else, daemonize
-        fi
-      else
         echo "${EMOJIS:+🤔 }testing uplink..."
+      else
+        echo "${EMOJIS:+📶✅ }network uplink restored!"
+        TIME=$(date +%s)
+        DOWNTIME="$(( $TIME - $NET_UP_TIME ))"
+        echo "${EMOJIS:+📶🌟 }net connection recovered after ${DOWNTIME} seconds of downtime"
+
+        # Report success via $METRICS_URL?
+        if [ "$EXTERNAL_METRICS" == "true" ];
+        then
+          #echo "config:EXTERNAL_METRICS=true"
+          #echo "> curl ${METRICS_URL}"
+          curl -ks --show-error $METRICS_URL >/dev/null
+          #echo "to disable external metrics reporting, set env key EXTERNAL_METRICS=false"
+        fi
+
+        # daemonize or exit with success?
+        if [ "$DIE_HAPPY" == "true" ];
+        then
+          exit 0
+        else
+          break
+        fi
       fi
 
     done
-    #give up 🔃 try restarting the uplink again...
   fi
 fi
 
