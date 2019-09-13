@@ -95,7 +95,10 @@ else
       # confirm reconnection of net uplink
       if ! $(nc -zw3 $REMOTE_SERVER $REMOTE_PORT >/dev/null 2>&1);
       then
-        echo "${EMOJIS:+🤔 }testing uplink..."
+	if [ "$DEBUG_OUT" == "enabled" ];
+        then
+          echo "${EMOJIS:+🤔 }testing uplink..."
+        fi
       else
         echo "${EMOJIS:+📶✅ }network uplink restored!"
         TIME=$(date +%s)
